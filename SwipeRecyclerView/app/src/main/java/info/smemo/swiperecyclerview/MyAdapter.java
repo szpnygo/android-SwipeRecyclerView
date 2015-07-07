@@ -35,13 +35,15 @@ public class MyAdapter extends RecyclerView.Adapter {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        //获取背景菜单
         View mybg = LayoutInflater.from(parent.getContext()).inflate(R.layout.bg_menu, null);
         mybg.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-
+        //获取item布局
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, null);
         view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
+        //生成返回RecyclerView.ViewHolder
         return new MyHolder(context, mybg, view, RecyclerViewDragHolder.EDGE_RIGHT).getDragViewHolder();
     }
 
