@@ -1,6 +1,8 @@
 # android-SwipeRecyclerView
 android可滑动菜单RecyclerView
 
+随后会加上对ListView的支持，返回View和ListView的Holder出来即可
+
 # Help
 需要添加
 compile 'com.android.support:support-v4:22.2.0'
