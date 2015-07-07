@@ -1,6 +1,5 @@
 # android-SwipeRecyclerView
 android可滑动菜单RecyclerView
-![](https://github.com/szpnygo/bsbdj-alfred-workflow/blob/master/bdj.png)
 
 # Help
 需要添加
@@ -8,6 +7,7 @@ compile 'com.android.support:support-v4:22.2.0'
 compile 'com.android.support:recyclerview-v7:22.2.0'
 
 使用非侵入式添加功能支持
+
 step1:
 ```android
 class MyHolder extends RecyclerViewDragHolder {
