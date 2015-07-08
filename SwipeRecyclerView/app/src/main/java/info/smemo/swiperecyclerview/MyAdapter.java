@@ -13,7 +13,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 /**
- * Created by suzhenpeng on 2015/6/4.
  */
 public class MyAdapter extends RecyclerView.Adapter {
 

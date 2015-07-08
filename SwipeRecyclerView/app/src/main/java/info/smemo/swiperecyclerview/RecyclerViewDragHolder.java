@@ -14,7 +14,6 @@ import android.widget.LinearLayout;
 
 /**
  * 支持左滑右滑菜单的Holder
- * Created by suzhenpeng on 2015/7/7.
  */
 public abstract class RecyclerViewDragHolder {
     /**
