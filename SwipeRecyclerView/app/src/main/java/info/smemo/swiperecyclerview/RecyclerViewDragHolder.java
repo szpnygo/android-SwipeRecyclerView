@@ -179,7 +179,6 @@ public abstract class RecyclerViewDragHolder {
         public void initView(View topView, View bgView) {
             this.topView = topView;
             this.bgView = bgView;
-//            viewX = topView.getLeft();
             viewX = 0;
             addView(createBgView(bgView));
             addView(topView);
@@ -291,6 +290,16 @@ public abstract class RecyclerViewDragHolder {
                     if (left < -bgWidth && dx < 0) return -bgWidth;
                 }
                 return left;
+            }
+
+            @Override
+            public int getViewHorizontalDragRange(View child) {
+                return topView == child ? child.getWidth() : 0;
+            }
+
+            @Override
+            public int getViewVerticalDragRange(View child) {
+                return topView == child ? child.getHeight() : 0;
             }
         }
 
