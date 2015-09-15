@@ -137,10 +137,6 @@ public abstract class RecyclerViewDragHolder {
          */
         private int bgWidth;
         /**
-         * 主界面宽度
-         */
-        private int topWidth;
-        /**
          * 默认右滑菜单
          */
         private int mTrackingEdges = EDGE_RIGHT;
@@ -189,7 +185,6 @@ public abstract class RecyclerViewDragHolder {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             if (widthMeasureSpec != 0) {
                 bgWidth = bgView.getWidth();
-                topWidth = topView.getWidth();
             }
         }
 
@@ -202,7 +197,7 @@ public abstract class RecyclerViewDragHolder {
         private View createBgView(View view) {
             LinearLayout linearLayout = new LinearLayout(getContext());
             linearLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            linearLayout.setGravity(mTrackingEdges == EDGE_RIGHT ? Gravity.RIGHT : Gravity.LEFT);
+            linearLayout.setGravity(mTrackingEdges == EDGE_RIGHT ? Gravity.END : Gravity.START);
             linearLayout.addView(view);
             return linearLayout;
         }
@@ -330,12 +325,7 @@ public abstract class RecyclerViewDragHolder {
         }
 
         public void open() {
-            int newLeft;
-            if (mTrackingEdges == EDGE_LEFT) {
-                newLeft = bgWidth;
-            } else {
-                newLeft = -1 * bgWidth;
-            }
+            int newLeft = (mTrackingEdges == EDGE_LEFT ? bgWidth : -1 * bgWidth);
             state = STATE_OPNE;
             if (mDragHelper.smoothSlideViewTo(topView, newLeft, 0)) {
                 ViewCompat.postInvalidateOnAnimation(DragLinearLayout.this);
