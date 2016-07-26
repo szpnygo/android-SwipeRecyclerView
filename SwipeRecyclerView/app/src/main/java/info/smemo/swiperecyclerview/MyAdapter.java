@@ -14,22 +14,25 @@ import java.util.ArrayList;
 
 /**
  */
-public class MyAdapter extends RecyclerView.Adapter {
+public class MyAdapter extends RecyclerView.Adapter implements RecyclerViewDragHolder.onDragListener {
 
     private ArrayList<String> stringArrayList;
     private Context context;
+    RecyclerViewDragHolder holderOpened;
 
     public MyAdapter(Context context) {
         this.context = context;
         stringArrayList = new ArrayList<>();
-        stringArrayList.add("neo");
-        stringArrayList.add("android");
-        stringArrayList.add("ios");
-        stringArrayList.add("blog");
-        stringArrayList.add("app");
-        stringArrayList.add("html");
-        stringArrayList.add("python");
-        stringArrayList.add("linux");
+        for (int i = 0; i < 5; i++) {
+            stringArrayList.add("neo");
+            stringArrayList.add("android");
+            stringArrayList.add("ios");
+            stringArrayList.add("blog");
+            stringArrayList.add("app");
+            stringArrayList.add("html");
+            stringArrayList.add("python");
+            stringArrayList.add("linux");
+        }
     }
 
     @Override
@@ -43,7 +46,27 @@ public class MyAdapter extends RecyclerView.Adapter {
         view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         //生成返回RecyclerView.ViewHolder
-        return new MyHolder(context, mybg, view, RecyclerViewDragHolder.EDGE_RIGHT).getDragViewHolder();
+        RecyclerViewDragHolder.DragViewHolder dragViewHolder = new MyHolder(context, mybg, view, RecyclerViewDragHolder.EDGE_RIGHT).getDragViewHolder();
+        dragViewHolder.holder.setOnDragListener(this);
+        return dragViewHolder;
+    }
+
+    @Override
+    public void onOpen(RecyclerViewDragHolder holder) {
+        if (holderOpened != null) {
+            holderOpened.close();
+        }
+
+        holderOpened = holder;
+    }
+
+    @Override
+    public void onClose(RecyclerViewDragHolder holder) {
+        if (holderOpened != null) {
+            holderOpened.close();
+        }
+
+        holderOpened = null;
     }
 
     class MyHolder extends RecyclerViewDragHolder {
