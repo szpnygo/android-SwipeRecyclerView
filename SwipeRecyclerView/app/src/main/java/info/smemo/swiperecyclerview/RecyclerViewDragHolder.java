@@ -25,6 +25,10 @@ public abstract class RecyclerViewDragHolder {
      */
     public static final int EDGE_RIGHT = 2;
     /**
+     * 拖动布局
+     */
+    protected DragLinearLayout itemView;
+    /**
      * 默认右滑菜单
      */
     private int mTrackingEdges = EDGE_RIGHT;
@@ -37,16 +41,18 @@ public abstract class RecyclerViewDragHolder {
      */
     private View topView;
     /**
-     * 拖动布局
-     */
-    protected DragLinearLayout itemView;
-    /**
      * 上下文对象
      */
     private Context context;
 
     private DragViewHolder dragViewHolder;
 
+    private onDragListener onDragListener;
+
+
+    public void setOnDragListener(onDragListener onDragListener){
+        this.onDragListener = onDragListener;
+    }
 
     public RecyclerViewDragHolder(Context context, View bgView, View topView) {
         this.bgView = bgView;
@@ -61,6 +67,16 @@ public abstract class RecyclerViewDragHolder {
         this.topView = topView;
         this.context = context;
         init();
+    }
+
+    /**
+     * 获取this
+     *
+     * @param viewHolder
+     * @return
+     */
+    public static RecyclerViewDragHolder getHolder(RecyclerView.ViewHolder viewHolder) {
+        return ((DragViewHolder) viewHolder).holder;
     }
 
     private void init() {
@@ -94,16 +110,6 @@ public abstract class RecyclerViewDragHolder {
      */
     public abstract void initView(View itemView);
 
-    /**
-     * 获取this
-     *
-     * @param viewHolder
-     * @return
-     */
-    public static RecyclerViewDragHolder getHolder(RecyclerView.ViewHolder viewHolder) {
-        return ((DragViewHolder) viewHolder).holder;
-    }
-
     class DragViewHolder extends RecyclerView.ViewHolder {
 
         public RecyclerViewDragHolder holder;
@@ -118,8 +124,19 @@ public abstract class RecyclerViewDragHolder {
 
     private class DragLinearLayout extends FrameLayout {
 
+        /**
+         * 打开
+         */
+        protected static final int STATE_OPNE = 1;
+        /**
+         * 关闭
+         */
+        protected static final int STATE_CLOSE = 2;
+        /**
+         * 当前是否打开
+         */
+        protected int state = STATE_CLOSE;
         private ViewDragHelper mDragHelper;
-
         /**
          * 展示类
          */
@@ -144,18 +161,6 @@ public abstract class RecyclerViewDragHolder {
          * 滑动百分比，超过百分比松开自动完成，不到则还原
          */
         private float scrollPercent = 0.2f;
-        /**
-         * 当前是否打开
-         */
-        protected int state = STATE_CLOSE;
-        /**
-         * 打开
-         */
-        protected static final int STATE_OPNE = 1;
-        /**
-         * 关闭
-         */
-        protected static final int STATE_CLOSE = 2;
 
         public DragLinearLayout(Context context) {
             super(context);
@@ -207,97 +212,6 @@ public abstract class RecyclerViewDragHolder {
             mDragHelper.setEdgeTrackingEnabled(mTrackingEdges == EDGE_RIGHT ? ViewDragHelper.EDGE_RIGHT : ViewDragHelper.EDGE_LEFT);
         }
 
-        private class ViewDragCallBack extends ViewDragHelper.Callback {
-
-            public ViewDragCallBack() {
-            }
-
-            @Override
-            public boolean tryCaptureView(View child, int pointerId) {
-                return child == topView;
-            }
-
-            @Override
-            public void onEdgeDragStarted(int edgeFlags, int pointerId) {
-                mDragHelper.captureChildView(topView, pointerId);
-                if (bgWidth != 0)
-                    bgView.setVisibility(View.GONE);
-
-            }
-
-            @Override
-            public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
-                if (left != viewX) {
-                    if (bgView.getVisibility() == View.GONE)
-                        bgView.setVisibility(View.VISIBLE);
-                } else {
-                    if (bgView.getVisibility() == View.VISIBLE)
-                        bgView.setVisibility(View.GONE);
-
-                }
-                invalidate();
-            }
-
-            @Override
-            public void onViewReleased(View releasedChild, float xvel, float yvel) {
-                super.onViewReleased(releasedChild, xvel, yvel);
-                if (releasedChild != topView)
-                    return;
-                int newLeft;
-                if (mTrackingEdges == EDGE_LEFT) {
-                    if (topView.getLeft() < (int) ((float) bgWidth * scrollPercent) || state == STATE_OPNE) {
-                        newLeft = viewX;
-                        state = STATE_CLOSE;
-                    } else {
-                        newLeft = bgWidth;
-                        state = STATE_OPNE;
-                    }
-                } else {
-                    if (topView.getLeft() > -(int) ((float) bgWidth * scrollPercent) || state == STATE_OPNE) {
-                        newLeft = viewX;
-                        state = STATE_CLOSE;
-                    } else {
-                        newLeft = -1 * bgWidth;
-                        state = STATE_OPNE;
-                    }
-                }
-                if (mDragHelper.smoothSlideViewTo(topView, newLeft, 0)) {
-                    ViewCompat.postInvalidateOnAnimation(DragLinearLayout.this);
-                }
-                invalidate();
-            }
-
-            /**
-             * 水平方向处理
-             *
-             * @param child 被拖动到view
-             * @param left  移动到达的x轴的距离
-             * @param dx    建议的移动的x距离
-             * @return
-             */
-            @Override
-            public int clampViewPositionHorizontal(View child, int left, int dx) {
-                if (mTrackingEdges == EDGE_LEFT) {
-                    if (left > bgWidth && dx > 0) return bgWidth;
-                    if (left < 0 && dx < 0) return 0;
-                } else {
-                    if (left > 0 && dx > 0) return 0;
-                    if (left < -bgWidth && dx < 0) return -bgWidth;
-                }
-                return left;
-            }
-
-            @Override
-            public int getViewHorizontalDragRange(View child) {
-                return topView == child ? child.getWidth() : 0;
-            }
-
-            @Override
-            public int getViewVerticalDragRange(View child) {
-                return topView == child ? child.getHeight() : 0;
-            }
-        }
-
         @Override
         public boolean onInterceptTouchEvent(MotionEvent ev) {
             if (state == STATE_CLOSE)
@@ -340,5 +254,107 @@ public abstract class RecyclerViewDragHolder {
             }
             invalidate();
         }
+
+        private class ViewDragCallBack extends ViewDragHelper.Callback {
+
+            public ViewDragCallBack() {
+            }
+
+            @Override
+            public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
+                if (left != viewX) {
+                    if (bgView.getVisibility() == View.GONE)
+                        bgView.setVisibility(View.VISIBLE);
+                } else {
+                    if (bgView.getVisibility() == View.VISIBLE)
+                        bgView.setVisibility(View.GONE);
+
+                }
+                invalidate();
+            }
+
+            @Override
+            public void onViewReleased(View releasedChild, float xvel, float yvel) {
+                super.onViewReleased(releasedChild, xvel, yvel);
+                if (releasedChild != topView)
+                    return;
+                int newLeft;
+                if (mTrackingEdges == EDGE_LEFT) {
+                    if (topView.getLeft() < (int) ((float) bgWidth * scrollPercent) || state == STATE_OPNE) {
+                        newLeft = viewX;
+                        state = STATE_CLOSE;
+                        onDragListener.onClose(RecyclerViewDragHolder.this);
+                    } else {
+                        newLeft = bgWidth;
+                        state = STATE_OPNE;
+                        onDragListener.onOpen(RecyclerViewDragHolder.this);
+
+                    }
+                } else {
+                    if (topView.getLeft() > -(int) ((float) bgWidth * scrollPercent) || state == STATE_OPNE) {
+                        newLeft = viewX;
+                        state = STATE_CLOSE;
+                        onDragListener.onClose(RecyclerViewDragHolder.this);
+                    } else {
+                        newLeft = -1 * bgWidth;
+                        state = STATE_OPNE;
+                        onDragListener.onOpen(RecyclerViewDragHolder.this);
+                    }
+                }
+                if (mDragHelper.smoothSlideViewTo(topView, newLeft, 0)) {
+                    ViewCompat.postInvalidateOnAnimation(DragLinearLayout.this);
+                }
+                invalidate();
+            }
+
+            @Override
+            public void onEdgeDragStarted(int edgeFlags, int pointerId) {
+                mDragHelper.captureChildView(topView, pointerId);
+                if (bgWidth != 0)
+                    bgView.setVisibility(View.GONE);
+
+            }
+
+            @Override
+            public int getViewHorizontalDragRange(View child) {
+                return topView == child ? child.getWidth() : 0;
+            }
+
+            @Override
+            public int getViewVerticalDragRange(View child) {
+                return topView == child ? child.getHeight() : 0;
+            }
+
+            @Override
+            public boolean tryCaptureView(View child, int pointerId) {
+                return child == topView;
+            }
+
+            /**
+             * 水平方向处理
+             *
+             * @param child 被拖动到view
+             * @param left  移动到达的x轴的距离
+             * @param dx    建议的移动的x距离
+             * @return
+             */
+            @Override
+            public int clampViewPositionHorizontal(View child, int left, int dx) {
+                if (mTrackingEdges == EDGE_LEFT) {
+                    if (left > bgWidth && dx > 0) return bgWidth;
+                    if (left < 0 && dx < 0) return 0;
+                } else {
+                    if (left > 0 && dx > 0) return 0;
+                    if (left < -bgWidth && dx < 0) return -bgWidth;
+                }
+                return left;
+            }
+        }
+    }
+
+
+    public interface onDragListener{
+        void onOpen(RecyclerViewDragHolder holder);
+        void onClose(RecyclerViewDragHolder holder);
     }
 }
